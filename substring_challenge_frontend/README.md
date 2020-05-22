@@ -18,6 +18,8 @@ In the project directory, you can run:
 ```bash
 $ cd substring_challenge_frontend
 ```
+$ cp ./.env.example ./.env
+
 Install dependencies and devDependencies:
 ```bash
 $ npm install
@@ -25,6 +27,7 @@ $ npm install
 
 ## Start Web
 Configuration environment and change basic credentials:
+start API before running this 
 $ npm start
 
 ```

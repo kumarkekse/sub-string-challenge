@@ -1,98 +1,98 @@
-import React, { Component } from "react"
+import React, { useState } from "react"
 import { Link } from 'react-router-dom'
-import axios from  'axios';
-import { message } from 'antd';
+import axios from 'axios';
+import { message, Form, Input, Typography, Button } from 'antd';
 
-class SingUp extends Component {
-   constructor(props) {
-    super(props);
-    this.state = {
-      email:'',
-      password:'',
-      password_confirmation:'',
-      err:{}
-    }
-  }
-  
-  //set the input change value
-  handleChange=(event) =>{
-    this.setState({ [event.target.name]: event.target.value })
-  }
-  
+const layout = {
+  labelCol: { offset: 4, span: 4 },
+  wrapperCol: { span: 8 },
+};
+
+const tailLayout = {
+  wrapperCol: { offset: 8, span: 8 },
+};
+
+export default function SignUp(props) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const { history } = props
+
   //submit the form data
-  handleSubmit=async(event)=> {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    const err = {}
-    const {email , password , password_confirmation} = this.state
-    const {history} = this.props
-    if (password === '' ) {
-      err.password = 'Enter password.'
+    
+    const headers = {
+      'Content-Type': 'application/json'
     }
-    if (password_confirmation === '') {
-      err.password_confirmation = 'Enter confirm password.'
-    }
-    if (password_confirmation && password && password_confirmation !== password) {
-      err.password_confirmation = 'Password and confirm password should be same.'
-    }
-    if (email === '' || email.trim() === '') {
-      err.email = 'Email is required';
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
-      err.email = 'Invalid email';
-    }
-    this.setState({ err })
-    if (!Object.keys(err).length) {
-     await axios.post('https://sub-string-matcher.herokuapp.com/users', {
-        email: email.toLowerCase(),
-        password:password,
-        password_confirmation:password_confirmation
-      })
+    await axios.post(`${process.env.REACT_APP_API_URL}/users`, {
+      email: email.toLowerCase(),
+      password: password,
+      password_confirmation: passwordConfirmation
+    }, { headers })
       .then(function (response) {
-        if(response.status === 200){
-          history.push('/sign_in')
+        if (response.status === 200) {
+          localStorage.setItem('token', response.data.token)
+          history.push('/new')
         }
       })
       .catch(function (error) {
         message.error('Something went wrong.')
       });
-    }
   }
 
-  render() {
-    const {err , email , password , password_confirmation} = this.state
-    return (
-      <div className="col-md-6 col-md-offset-3">
-        <h2>Sign Up</h2>
-        <form  name="form" onSubmit={this.handleSubmit}>
-        <div className={'form-group'}>
-            <label htmlFor="userName">Email</label>
-            <input type="text" className="form-control" name="email" value={email} onChange={this.handleChange.bind(this)} />
-            { err && err.email ?
-             <div className="help-block">{err.email}</div> : ''
-             }    
+  return (
+    <Form
+      {...layout}
+      name="basic"
+      submit={handleSubmit}
+    >
+    <Form.Item {...tailLayout}>
+      <Typography.Title {...tailLayout} level={2}>Sign Up</Typography.Title>
+    </Form.Item>
+    <Form.Item
+      label="email"
+      name="email"
+      
+      rules={[{ required: true, message: 'Please input your email!' }]}
+    >
+      <Input 
+        name="email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+    </Form.Item>
 
-        </div>
-        <div className={'form-group'}>
-            <label htmlFor="password">Password</label>
-            <input type="password" className="form-control" name="password" value={password}  onChange={this.handleChange.bind(this)} />
-            {err && err.password ?
-             <div className="help-block">{err.password}</div> : '' 
-            }   
-        </div>
-        <div className={'form-group'}>
-            <label htmlFor="password_confirmation">Confirm Password</label>
-            <input type="password" className="form-control" name="password_confirmation" value={password_confirmation}  onChange={this.handleChange.bind(this)} />
-            {err && err.password_confirmation ?
-             <div className="help-block">{err.password_confirmation}</div> : '' 
-            }   
-        </div>
-        <div className="form-group">
-            <button type="submit" className="btn btn-primary">SingUp</button>
-            <Link to="/sign_in" className="btn btn-link">Cancel</Link>
-        </div>                     
-        </form>
-      </div>
-     )
-  }
+    <Form.Item
+      label="Password"
+      name="password"
+      
+      rules={[{ required: true, message: 'Please input your password!' }]}
+    >
+      <Input.Password 
+        name="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+    </Form.Item>
+
+    <Form.Item
+      label="Password Confirmation"
+      name="passwordConfirmation"
+      rules={[{ required: true, message: 'Please input your password confirmation!' }]}
+    >
+      <Input.Password 
+        name="passwordConfirmation"
+        value={passwordConfirmation}
+        onChange={(e) => setPasswordConfirmation(e.target.value)}
+      />
+    </Form.Item>
+
+    <Form.Item {...tailLayout}>
+      <Button type="primary" onClick={handleSubmit} htmlType="submit">Sign Up</Button>
+      <Link to="/sign_in" className="btn btn-link">Sign In</Link>
+    </Form.Item>
+  </Form>
+  )
 }
-
-export default SingUp

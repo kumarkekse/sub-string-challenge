@@ -1,86 +1,80 @@
-import React, { Component } from "react"
-import { Link } from 'react-router-dom'
-import axios from  'axios';
-import _ from 'lodash'
-import { message } from 'antd';
+import React, { useState } from "react"
+import axios from 'axios';
+import { message, Form, Input, Button, Typography } from 'antd';
+import { Link } from "react-router-dom"
 
-class SingUp extends Component {
-   constructor(props) {
-    super(props);
-    this.state = {
-      email:'',
-      password:'',
-      err:{}
-    }
-  }
+const layout = {
+  labelCol: { offset: 4, span: 4 },
+  wrapperCol: { span: 8 },
+};
 
-  //set the input change value
-  handleChange=(event) =>{
-    this.setState({ [event.target.name]: event.target.value })
-  }
-  
+const tailLayout = {
+  wrapperCol: { offset: 8, span: 8 },
+};
+
+export default function SignIn(props) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { history } = props
+
   //submit the form data
-  handleSubmit=async(event)=> {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    const err = {}
-    const {email , password } = this.state
-    const {history} = this.props
-    if (password === '' ) {
-      err.password = 'Enter password.'
-    }
-    if (email === '' || email.trim() === '') {
-      err.email = 'Email is required';
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
-      err.email = 'Invalid email';
-    }
-    this.setState({ err })
-    if (!Object.keys(err).length) {
-        await axios.post('https://sub-string-matcher.herokuapp.com/users/sign_in', {
-           email: email.toLowerCase(),
-           password:password
-         })
-         .then(function (response) {
-           if(response.status === 200){
-             localStorage.setItem('token',_.get(response,'data.token',null))
-             history.push('/create_string_matches')
-           }
-         })
-         .catch(function (error) {
-           console.log(error);
-           message.error('Something went wrong.')
-        });
-    }
+    await axios.post(`${process.env.REACT_APP_API_URL}/users/sign_in`, {
+      email,
+      password
+    })
+      .then(function (response) {
+        if (response.status === 200) {
+          localStorage.setItem('token', response.data.token)
+          history.push('/new')
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+        message.error('Something went wrong.')
+      });
   }
+  return (
+    <Form
+      {...layout}
+      name="basic"
+      submit={handleSubmit}
+    >
+      <Form.Item {...tailLayout}>
+        <Typography.Title {...tailLayout} level={2}>Sign In</Typography.Title>
+      </Form.Item>
+      <Form.Item
+        label="email"
+        name="email"
+        
+        rules={[{ required: true, message: 'Please input your email!' }]}
+      >
+        <Input 
+          name="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </Form.Item>
 
-  render() {
-    const {err , email , password } = this.state
-    return (
-      <div className="col-md-6 col-md-offset-3">
-        <h2>Sign In</h2>
-        <form  name="form" onSubmit={this.handleSubmit}>
-        <div className={'form-group'}>
-            <label htmlFor="userName">Email</label>
-            <input type="text" className="form-control" name="email" value={email} onChange={this.handleChange.bind(this)} />
-            { err && err.email ?
-             <div className="help-block">{err.email}</div> : ''
-             }    
+      <Form.Item
+        label="Password"
+        name="password"
+        
+        rules={[{ required: true, message: 'Please input your password!' }]}
+      >
+        <Input.Password 
+          name="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </Form.Item>
 
-        </div>
-        <div className={'form-group'}>
-            <label htmlFor="password">Password</label>
-            <input type="password" className="form-control" name="password" value={password}  onChange={this.handleChange.bind(this)} />
-            {err && err.password ?
-             <div className="help-block">{err.password}</div> : '' 
-            }   
-        </div>
-        <div className="form-group">
-            <button type="submit" className="btn btn-primary">Sign In</button>
-            <Link to="/sign_up" className="btn btn-link">Sign Up</Link>
-        </div>                     
-        </form>
-      </div>
-     )
-  }
+      <Form.Item {...tailLayout}>
+        <Button type="primary" onClick={handleSubmit} htmlType="submit">Sign In</Button>
+        <Link to="/sign_up" className="btn btn-link">Sign Up</Link>
+      </Form.Item>
+    </Form>
+  )
 }
-
-export default SingUp
