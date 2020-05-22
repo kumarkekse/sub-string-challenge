@@ -9,10 +9,7 @@ class StringMatchesController < ApplicationController
   end
 
   def create
-    @string_match = StringMatch.new(string_match_params)
-    @string_match.user = @current_user
-    @string_match.result = StringCalService.call(params[:first_string])
-                                           .non_continous_substr?(params[:second_string])
+    @string_match = @current_user.string_matches.build(string_match_params)
     if @string_match.save
       render json: @string_match, status: :created, location: @string_match
     else
@@ -21,8 +18,13 @@ class StringMatchesController < ApplicationController
   end
 
   def destroy
-    @string_match.destroy
-    render json: { status: 'deleted' }
+    string_match = @current_user.string_matches.find(@string_match.id)
+    if string_match
+      string_match.destroy
+      render json: { status: 'deleted' }
+    else
+      render json: { status: 'String match not matched with user' }
+    end
   end
 
   private
