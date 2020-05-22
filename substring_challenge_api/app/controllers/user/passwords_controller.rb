@@ -1,34 +1,38 @@
-# frozen_string_literal: true
-
 class User::PasswordsController < Devise::PasswordsController
-  # GET /resource/password/new
-  # def new
-  #   super
-  # end
+  before_action :authorize_request, except: %i[create update]
+  append_before_action :assert_reset_token_passed, only: :update
 
-  # POST /resource/password
-  # def create
-  #   super
-  # end
+  def create
+    user = User.find_by_email(params[:email])
+    if user.present?
+      user.send_reset_password_instructions
+      render json: { status: 200,
+                     message: 'password reset instructions sent to email!' }
+    else
+      render json: { error: 'no such email' }
+    end
+  end
 
-  # GET /resource/password/edit?reset_password_token=abcdef
-  # def edit
-  #   super
-  # end
+  def update
+    user = User.find_by_email(params[:email])
+    if user.present?
+      if user.reset_password_period_valid? &&
+         user.reset_password(params[:password], params[:password_confirmation])
+        render json: { status: 200, message: 'reset password successful' }
+      else
+        user.errors.add(:reset_password_token, :expired)
+        render json: { eror: user.errors.full_messages }
+      end
+    else
+      render json: { eror: 'User not registered!' }
+    end
+  end
 
-  # PUT /resource/password
-  # def update
-  #   super
-  # end
+  protected
 
-  # protected
+  def assert_reset_token_passed
+    return unless params[:reset_password_token].blank?
 
-  # def after_resetting_password_path_for(resource)
-  #   super(resource)
-  # end
-
-  # The path used after sending reset password instructions
-  # def after_sending_reset_password_instructions_path_for(resource_name)
-  #   super(resource_name)
-  # end
+    render json: { status: :error, message: 'no reset token provided !' }
+  end
 end

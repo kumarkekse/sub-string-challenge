@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   resources :string_matches, only: %i[index create destroy]
   devise_for :users, defaults: { format: :json }, controllers: {
+    passwords: 'user/passwords',
     sessions: 'user/sessions',
     registrations: 'user/registrations'
   }
