@@ -7,13 +7,6 @@ import './css/stringList.css'
 
 const { confirm } = Modal;
 
-const token = localStorage.getItem('token')
-let config = {
-  headers: {
-    Authorization: token,
-  }
-}
-
 class StringMatchesList extends Component {
   constructor(props) {
     super(props);
@@ -24,6 +17,12 @@ class StringMatchesList extends Component {
 
   componentDidMount = async() =>{
     try{
+      const token = localStorage.getItem('token')
+      let config = {
+        headers: {
+          Authorization: token,
+        }
+      }
       const response = await axios.get('https://sub-string-matcher.herokuapp.com/string_matches',config)
       this.setState({matchedStringArray:_.get(response,'data',[])})
     }catch(error){
@@ -34,6 +33,12 @@ class StringMatchesList extends Component {
   
   //Delete the substring 
   handleDeleteConfirm=(data)=> {
+    const token = localStorage.getItem('token')
+    let config = {
+      headers: {
+        Authorization: token,
+      }
+    }
     confirm({
       title: 'Are you sure delete this string match?',
       icon: <ExclamationCircleOutlined />,

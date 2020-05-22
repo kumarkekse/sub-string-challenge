@@ -14,10 +14,12 @@ class SingUp extends Component {
     }
   }
 
+  //set the input change value
   handleChange=(event) =>{
     this.setState({ [event.target.name]: event.target.value })
   }
-
+  
+  //submit the form data
   handleSubmit=async(event)=> {
     event.preventDefault()
     const err = {}

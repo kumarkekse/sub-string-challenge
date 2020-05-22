@@ -13,11 +13,13 @@ class CreateStringMatches extends Component {
       second_string:'',
     }
   }
-
+  
+  //set the input change value
   handleChange=(event) =>{
     this.setState({ [event.target.name]: event.target.value })
   }
-
+  
+  //submit the form data
   handleSubmit=async(event)=> {
     event.preventDefault()
     const err = {}
@@ -55,7 +57,8 @@ class CreateStringMatches extends Component {
       });
     }
   }
-
+  
+  //handle the signout 
   handleSignOut(){
     const {history} = this.props
     localStorage.clear('token')
