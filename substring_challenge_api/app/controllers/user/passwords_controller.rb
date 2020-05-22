@@ -21,10 +21,10 @@ class User::PasswordsController < Devise::PasswordsController
         render json: { status: 200, message: 'reset password successful' }
       else
         user.errors.add(:reset_password_token, :expired)
-        render json: { eror: user.errors.full_messages }
+        render json: { error: user.errors.full_messages }
       end
     else
-      render json: { eror: 'User not registered!' }
+      render json: { error: 'User not registered!' }
     end
   end
 
